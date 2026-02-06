@@ -1,0 +1,6 @@
+beautifulsoup4
+requests
+python-dotenv
+newspaper3k
+lxml_html_clean
+nltk
