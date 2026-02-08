@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from newspaper import Article, Config
 import nltk
 import requests
+from deep_translator import GoogleTranslator
 from notion_client import add_paper_to_notion
 
 # nlp()を使うために必要なデータをダウンロード（初回のみでOKだけど念のため）
@@ -112,9 +113,26 @@ def extract_papers_from_message(msg):
             else:
                 print("Skipping non-arXiv URL.")
 
+            # 日本語翻訳
+            abstract_jp = ""
+            # arXiv / bioRxiv の場合のみ翻訳を実行
+            is_arxiv = "arxiv.org" in real_url or "biorxiv.org" in real_url
+            
+            if is_arxiv and final_abstract and final_abstract != "No Abstract":
+                try:
+                    # deep_translatorを使って翻訳
+                    translator = GoogleTranslator(source='auto', target='ja')
+                    # 長すぎると翻訳エラーになりやすいので4500文字で制限しておく
+                    translated = translator.translate(final_abstract[:4500]) 
+                    if translated:
+                        abstract_jp = translated
+                        print(f"Translated Abstract (JP): {abstract_jp[:30]}...")
+                except Exception as e:
+                    print(f"Translation failed: {e}")
+
             # Notionに追加
             print("Adding to Notion...")
-            add_paper_to_notion(title, real_url, authors, final_abstract)
+            add_paper_to_notion(title, real_url, authors, final_abstract, abstract_jp)
             print("-" * 20)
             
     if papers_found == 0:

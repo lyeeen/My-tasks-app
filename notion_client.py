@@ -9,7 +9,7 @@ load_dotenv()
 NOTION_API_KEY = os.getenv("NOTION_API_KEY")
 NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
-def add_paper_to_notion(title, url, authors, abstract):
+def add_paper_to_notion(title, url, authors, abstract, abstract_jp=""):
     """
     論文情報をNotionデータベースに追加する関数
     """
@@ -42,6 +42,9 @@ def add_paper_to_notion(title, url, authors, abstract):
             },
             "Abstract": {
                 "rich_text": [{"text": {"content": abstract[:2000] if abstract else ""}}]
+            },
+            "Abstract_JP": {
+                "rich_text": [{"text": {"content": abstract_jp[:2000] if abstract_jp else ""}}]
             }
         }
     }
