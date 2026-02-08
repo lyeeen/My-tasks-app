@@ -1,4 +1,5 @@
 import email
+from email.header import decode_header
 from email import policy
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
@@ -34,6 +35,25 @@ def extract_papers_from_message(msg):
     """
     email.message.Message オブジェクトから論文を抽出してNotionに追加する
     """
+    # SubjectからTopicを抽出
+    subject = msg.get("Subject", "")
+    topic = "Unknown"
+    
+    if subject:
+        # デコード処理
+        decoded_list = decode_header(subject)
+        topic_parts = []
+        for content, encoding in decoded_list:
+             if isinstance(content, bytes):
+                 topic_parts.append(content.decode(encoding or "utf-8"))
+             else:
+                 topic_parts.append(content)
+        full_subject = "".join(topic_parts)
+        
+        # " - new results" を削除してトピック名にする
+        topic = full_subject.replace(" - new results", "").strip()
+        print(f"Topic: {topic}")
+
     # メール本文（HTML部分）を取り出す
     html_content = ""
     if msg.is_multipart():
@@ -132,7 +152,7 @@ def extract_papers_from_message(msg):
 
             # Notionに追加
             print("Adding to Notion...")
-            add_paper_to_notion(title, real_url, authors, final_abstract, abstract_jp)
+            add_paper_to_notion(title, real_url, authors, final_abstract, abstract_jp, topic)
             print("-" * 20)
             
     if papers_found == 0:

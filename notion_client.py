@@ -9,7 +9,7 @@ load_dotenv()
 NOTION_API_KEY = os.getenv("NOTION_API_KEY")
 NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
-def add_paper_to_notion(title, url, authors, abstract, abstract_jp=""):
+def add_paper_to_notion(title, url, authors, abstract, abstract_jp="", topic=""):
     """
     論文情報をNotionデータベースに追加する関数
     """
@@ -27,7 +27,7 @@ def add_paper_to_notion(title, url, authors, abstract, abstract_jp=""):
     }
 
     # Notionのプロパティに合わせてデータを作る
-    # Title (title), URL (url), Authors (rich_text), Abstract (rich_text)
+    # Title (title), URL (url), Authors (rich_text), Abstract (rich_text), Topic (rich_text)
     data = {
         "parent": {"database_id": NOTION_DATABASE_ID},
         "properties": {
@@ -45,6 +45,12 @@ def add_paper_to_notion(title, url, authors, abstract, abstract_jp=""):
             },
             "Abstract_JP": {
                 "rich_text": [{"text": {"content": abstract_jp[:2000] if abstract_jp else ""}}]
+            },
+            "Topic": {
+                "rich_text": [{"text": {"content": topic if topic else ""}}]
+            },
+            "Read": {
+                "checkbox": False
             }
         }
     }
