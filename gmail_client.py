@@ -90,11 +90,13 @@ def fetch_scholar_emails(limit=5, only_unread=True, query=None):
             pass
 
 if __name__ == "__main__":
-    print("--- Gmail Connection Test ---")
-    # テストとして「全てのメール」から最新3件を取得してみる
-    emails = fetch_scholar_emails(limit=3, only_unread=False, query="ALL")
+    print("--- Gmail Connection Test (Default Criteria) ---")
+    
+    # queryを指定しない（本番と同じ動作）
+    # ただし未読メールがないかもしれないので、only_unread=False にしておく
+    emails = fetch_scholar_emails(limit=3, only_unread=False) 
     
     if emails:
-        print("Success! Connection established.")
+        print("Success! Found Scholar Emails.")
     else:
-        print("No emails found (Login might be successful but inbox is empty?)")
+        print("No matching Scholar emails found. (The criteria might be wrong!)")
