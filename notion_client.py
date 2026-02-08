@@ -31,26 +31,26 @@ def add_paper_to_notion(title, url, authors, abstract, abstract_jp="", topic="")
     data = {
         "parent": {"database_id": NOTION_DATABASE_ID},
         "properties": {
+            "Read": {
+                "checkbox": False
+            },
             "Title": {
                 "title": [{"text": {"content": title}}]
-            },
-            "URL": {
-                "url": url
-            },
-            "Authors": {
-                "rich_text": [{"text": {"content": authors[:2000] if authors else ""}}]
-            },
-            "Abstract": {
-                "rich_text": [{"text": {"content": abstract[:2000] if abstract else ""}}]
-            },
-            "Abstract_JP": {
-                "rich_text": [{"text": {"content": abstract_jp[:2000] if abstract_jp else ""}}]
             },
             "Topic": {
                 "rich_text": [{"text": {"content": topic if topic else ""}}]
             },
-            "Read": {
-                "checkbox": False
+            "Abstract_JP": {
+                "rich_text": [{"text": {"content": abstract_jp[:2000] if abstract_jp else ""}}]
+            },
+            "Abstract": {
+                "rich_text": [{"text": {"content": abstract[:2000] if abstract else ""}}]
+            },
+            "Authors": {
+                "rich_text": [{"text": {"content": authors[:2000] if authors else ""}}]
+            },
+            "URL": {
+                "url": url
             }
         }
     }
