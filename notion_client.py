@@ -2,6 +2,7 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
+from datetime import datetime
 
 # 環境変数を読み込む
 load_dotenv()
@@ -10,9 +11,7 @@ NOTION_API_KEY = os.getenv("NOTION_API_KEY")
 NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
 def add_paper_to_notion(title, url, authors, abstract, abstract_jp="", topic=""):
-    """
-    論文情報をNotionデータベースに追加する関数
-    """
+    # ... (エラーチェック)
     if not NOTION_API_KEY:
         print("Error: NOTION_API_KEY is not set.")
         return
@@ -26,13 +25,18 @@ def add_paper_to_notion(title, url, authors, abstract, abstract_jp="", topic="")
         "Notion-Version": "2022-06-28"
     }
 
+    # 日付を取得 (YYYY-MM-DD)
+    today_str = datetime.now().strftime('%Y-%m-%d')
+
     # Notionのプロパティに合わせてデータを作る
-    # Title (title), URL (url), Authors (rich_text), Abstract (rich_text), Topic (rich_text)
     data = {
         "parent": {"database_id": NOTION_DATABASE_ID},
         "properties": {
             "Read": {
                 "checkbox": False
+            },
+            "Date": {
+                "date": {"start": today_str}
             },
             "Title": {
                 "title": [{"text": {"content": title}}]

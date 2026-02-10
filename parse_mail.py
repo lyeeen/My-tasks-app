@@ -3,17 +3,35 @@ from email.header import decode_header
 from email import policy
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
-from newspaper import Article, Config
-import nltk
-import requests
 from deep_translator import GoogleTranslator
 from notion_client import add_paper_to_notion
+from paper_fetcher import get_paper_abstract
 
-# nlp()を使うために必要なデータをダウンロード（初回のみでOKだけど念のため）
-try:
-    nltk.data.find('tokenizers/punkt_tab')
-except LookupError:
-    nltk.download('punkt_tab')
+# ...
+# nlp関連やrequests, reなどは不要になったので削除してOK
+
+def extract_papers_from_message(msg):
+    # ... (Subject抽出やHTML取得部分はそのまま)
+    # ... (BeautifulSoupパースもそのまま)
+    
+            # ... (タイトル、URL、著者、メール内Abstract抽出までそのまま)
+            
+            print(f"Title: {title}")
+            print(f"URL: {real_url}")
+            
+            final_abstract = abstract_from_mail
+
+            # --- Refactored Block Start ---
+            # 外部サイトからAbstractを取得
+            fetched_abstract = get_paper_abstract(real_url)
+            if fetched_abstract:
+                final_abstract = fetched_abstract
+            else:
+                print("Using abstract from email (or none).")
+            # --- Refactored Block End ---
+
+            # 日本語翻訳
+            # ... (翻訳ロジックはそのままだけど、対象ドメイン判定はpaper_fetcherに任せてもいいが一旦そのまま)
 
 # ... imports ...
 import email
@@ -105,40 +123,19 @@ def extract_papers_from_message(msg):
             
             final_abstract = abstract_from_mail
 
-            # Webから記事詳細を取得 (arXivなど)
-            # ... (ここから下のロジックは前のままだけど、インデントに注意)
-            if "arxiv.org" in real_url or "biorxiv.org" in real_url:
-                if "/pdf/" in real_url:
-                    real_url = real_url.replace("/pdf/", "/abs/")
-                    if real_url.endswith(".pdf"):
-                         real_url = real_url[:-4]
-                try:
-                    headers = {'User-Agent': 'Mozilla/5.0'}
-                    res = requests.get(real_url, headers=headers)
-                    if res.status_code == 200:
-                        paper_soup = BeautifulSoup(res.text, "html.parser")
-                        abs_quote = paper_soup.find("blockquote", class_="abstract")
-                        if abs_quote:
-                            full_abstract = abs_quote.get_text().replace("Abstract:", "").strip()
-                            print(f"Fetched Full Abstract (arXiv): {full_abstract[:50]}...")
-                            final_abstract = full_abstract
-                        else:
-                            meta_desc = paper_soup.find("meta", attrs={"name": "DC.Description"})
-                            if meta_desc:
-                                 final_abstract = meta_desc['content']
-                    else:
-                        print(f"Failed to fetch: Status {res.status_code}")
-                except Exception as e:
-                    print(f"ArXiv fetch error: {e}")
+            # 外部サイトからAbstractを取得
+            fetched_abstract = get_paper_abstract(real_url)
+            if fetched_abstract:
+                final_abstract = fetched_abstract
+                print(f"Using fetched abstract: {final_abstract[:50]}...")
             else:
-                print("Skipping non-arXiv URL.")
+                 print("Using abstract from email (or none).")
 
             # 日本語翻訳
             abstract_jp = ""
-            # arXiv / bioRxiv の場合のみ翻訳を実行
-            is_arxiv = "arxiv.org" in real_url or "biorxiv.org" in real_url
             
-            if is_arxiv and final_abstract and final_abstract != "No Abstract":
+            # Abstractがあれば（Web由来でもメール由来でも）翻訳を実行する
+            if final_abstract and final_abstract != "No Abstract":
                 try:
                     # deep_translatorを使って翻訳
                     translator = GoogleTranslator(source='auto', target='ja')
