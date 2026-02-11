@@ -2,7 +2,7 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 # 環境変数を読み込む
 load_dotenv()
@@ -25,8 +25,11 @@ def add_paper_to_notion(title, url, authors, abstract, abstract_jp="", topic="")
         "Notion-Version": "2022-06-28"
     }
 
-    # 日付を取得 (YYYY-MM-DD)
-    today_str = datetime.now().strftime('%Y-%m-%d')
+    # JST (UTC+9) のタイムゾーンを作成
+    JST = timezone(timedelta(hours=9), 'JST')
+    
+    # 日付をJSTで取得 (YYYY-MM-DD)
+    today_str = datetime.now(JST).strftime('%Y-%m-%d')
 
     # Notionのプロパティに合わせてデータを作る
     data = {
