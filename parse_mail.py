@@ -4,6 +4,12 @@ from email import policy
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
 from deep_translator import GoogleTranslator
+import os
+from dotenv import load_dotenv
+
+# 環境変数を読み込む
+load_dotenv()
+
 from notion_client import add_paper_to_notion
 from paper_fetcher import get_paper_abstract
 
@@ -110,6 +116,25 @@ def extract_papers_from_message(msg):
             
             real_url = qs['url'][0] if 'url' in qs else raw_url
             
+            # --- Blocklist Check ---
+            blocklist = []
+            block_articles_env = os.getenv("BLOCK_ARTICLE", "")
+            if block_articles_env:
+                for domain in block_articles_env.split(","):
+                    d = domain.strip()
+                    if d:
+                        blocklist.append(d)
+
+            should_block = False
+            for blocked_domain in blocklist:
+                if blocked_domain in real_url:
+                    print(f"Skipping blocked domain: {blocked_domain} in {real_url}")
+                    should_block = True
+                    break
+            
+            if should_block:
+                continue
+            # -----------------------
             # 著者情報の抽出
             author_div = h3.find_next_sibling("div", style=lambda s: s and "color:#006621" in s)
             authors = author_div.get_text(strip=True) if author_div else "No Authors"
